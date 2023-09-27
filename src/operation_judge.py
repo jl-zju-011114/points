@@ -84,7 +84,7 @@ def judge_points(file_name):
 
     points_bias = []  # 瞬时角度偏差
     for i in range(len(points_angle) - 10):
-        angle_c = points_angle[i + 5]
+        angle_c = points_angle[i + 5]   # 从第6个点开始计算瞬时角度偏差
         if i != 0:
             angle_sum_11 -= points_angle[i]
             angle_sum_11 += points_angle[i + 10]
@@ -92,12 +92,12 @@ def judge_points(file_name):
 
         points_bias.append(angle_bias)
 
-    print("角度瞬时偏差", points_bias)
+    print("角度瞬时偏差：", points_bias)
 
     point_bias_threshold = 10  # 角度偏差阈值
-    point_num_threshold = 20  # 连续满足阈值条件的点数
+    point_num_threshold = 10  # 连续满足阈值条件的点数
 
-    point_sections = []
+    points_section = []
     begin_index = -1
 
     #  遍历查找满足条件的连续区间
@@ -106,28 +106,29 @@ def judge_points(file_name):
             begin_index = i
         elif points_bias[i] > point_bias_threshold:
             if begin_index != -1 and i - begin_index > point_num_threshold:
-                point_sections.append([begin_index, i - 1])
+                points_section.append([begin_index, i - 1])
             begin_index = -1
 
-    print("满足条件的连续区间：", point_sections)
+    print("满足条件的连续区间：", points_section)
 
     isOperation = False
     section_angle = []  # 存储区间范围内的角度均值
 
     # 计算满足条件的连续区间点集的平均角度
-    for section in point_sections:
+    for section in points_section:
         begin = section[0]
         end = section[1]
         section_angle_sum = 0
         for index in range(begin, end + 1):
-            section_angle_sum += points_angle[index + 5]
+            section_angle_sum += points_angle[index + 5]    # points_bias和points_angle相差5个下标
         section_angle_mean = section_angle_sum / (end - begin + 1)
         section_angle.append(section_angle_mean)
 
     print(section_angle)
 
-    section_bias_threshold = 10
+    section_bias_threshold = 10     # 区间角度差异阈值
 
+    #   判断是否有两个连续区间的角度(斜率)差异满足阈值
     for i in range(len(section_angle) - 1):
         if math.fabs(section_angle[i] - section_angle[i + 1]) < section_bias_threshold:
             isOperation = True
@@ -140,4 +141,4 @@ def judge_points(file_name):
 
 
 if __name__ == "__main__":
-    judge_points("../data/origin/machine_operation_4.xlsx")
+    judge_points("../data/origin/machine_operation_1.xlsx")
